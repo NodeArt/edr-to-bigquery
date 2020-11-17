@@ -1,0 +1,28 @@
+# This is a basic workflow that is manually triggered
+
+name: Run script
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  push:
+    branches: actions
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Build and Deploy
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup and run Node
+        uses: actions/setup-node@v1.4.3
+        with:
+          node-version: '14'
+      - run: npm install
+      - run: npm start
+        env:
+          BQ_DATASET_ID: ${{ secrets.BQ_DATASET_ID }}
+          BQ_PROJECT_ID: ${{ secrets.BQ_PROJECT_ID }}
+          BQ_PRIVATE_KEY: ${{ secrets.BQ_PRIVATE_KEY }}
+          BQ_CLIENT_ID: ${{ secrets.BQ_CLIENT_ID }}
+          BQ_CLIENT_EMAIL: ${{ secrets.BQ_CLIENT_EMAIL }}
