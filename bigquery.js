@@ -60,20 +60,10 @@ module.exports.insertData = (fileStream, tableConfig) => {
     process.exit(1);
   });
 
-  // bqStream.on('job', (job) => {
-  //   // `job` is a Job object that can be used to check the status of the
-  //   // request.
-  //   // console.log(job);
-  // })
-  // .on('complete', (job) => {
-  //   // The job has completed successfully.
-  // });
-
   const iconvStream = iconv.decodeStream('win1251');
 
   const saxStream = sax.createStream(true);
 
-  // const stream =
   pipeline(
     fileStream,
     iconvStream,
