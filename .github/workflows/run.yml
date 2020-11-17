@@ -5,8 +5,8 @@ name: Run script
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
 on:
-  push:
-    branches: actions
+  schedule:
+    - cron:  '0 0 * * *'
 
 jobs:
   deploy:
