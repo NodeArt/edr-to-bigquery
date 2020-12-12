@@ -18,7 +18,7 @@ jobs:
         uses: actions/setup-node@v2-beta
         with:
           node-version: '14'
-      - run: npm install
+      - run: npm ci
       - run: npm start
         env:
           BQ_DATASET_ID: ${{ secrets.BQ_DATASET_ID }}
