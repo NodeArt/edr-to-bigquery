@@ -89,7 +89,7 @@ module.exports.insertData = (fileStream, tableConfig) => {
     if (node.name.toLowerCase() === entityTag) {
       entity = [
         Object.keys(node.attributes).reduce((a, v) => {
-          a[v.toLowerCase()] = node.attributes[v];
+          a[v.toLowerCase()] = node.attributes[v].replace('&quot;', '').replace('"', '');
           return a;
         }, {}),
       ];
