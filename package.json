@@ -20,7 +20,7 @@
     "unzipper": "^0.10.11"
   },
   "devDependencies": {
-    "commitlint": "^12.1.1",
+    "commitlint": "^12.1.4",
     "eslint": "^7.26.0",
     "eslint-config-standard": "^16.0.2",
     "eslint-plugin-import": "^2.22.1",
