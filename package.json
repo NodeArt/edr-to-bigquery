@@ -16,8 +16,8 @@
     "dotenv": "^10.0.0",
     "iconv-lite": "^0.6.3",
     "node-fetch": "^2.6.0",
-    "sax": "^1.2.4",
-    "unzipper": "^0.10.11"
+    "unzipper": "^0.10.11",
+    "xml-to-json-stream": "^1.1.0"
   },
   "devDependencies": {
     "commitlint": "^12.1.4",
