@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const fetch = require('node-fetch');
 const unzipper = require('unzipper');
+const path = require('path');
 
 const { DATA_URL } = require('./config/download');
 const { getTable, insertData } = require('./bigquery');
@@ -18,7 +19,13 @@ const downloadFile = async () => {
       const tables = ['uo', 'fop'];
 
       console.log('got file', entry.path);
-      const table = tables.find(table => entry.path.toLowerCase().includes(table));
+
+      if (entry.type !== 'File') {
+        console.log('Entry type is ' + entry.type + ', skipping');
+        return;
+      }
+
+      const table = tables.find(table => path.basename(entry.path).toLowerCase().includes(table));
 
       if (table) {
         const tableConfig = bqConfig[table];

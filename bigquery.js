@@ -177,17 +177,19 @@ module.exports.insertData = (fileStream, tableConfig) => {
   });
 
   // manually end the bqStream if no XML data is left to write all remaining entities
-  saxStream.on('end', () => bqStream.end());
+  saxStream.on('end', () => (console.log('SAX stream end'), bqStream.end()));
 
   bqStream.once('complete', () => {
     console.log('bq end');
     process.exit(0);
   });
 
-  fileStream.on('error', () => bqStream.end());
-  fileStream.on('end', () => bqStream.end());
-  iconvStream.on('error', () => bqStream.end());
-  iconvStream.on('end', () => bqStream.end());
+  bqStream.on('error', (e) => console.log(e));
+
+  fileStream.on('error', () => (console.log('File stream error'), bqStream.end()));
+  fileStream.on('end', () => (console.log('File stream end'), bqStream.end()));
+  iconvStream.on('error', () => (console.log('Iconv stream error'), bqStream.end()));
+  iconvStream.on('end', () => (console.log('Iconv stream end'), bqStream.end()));
 
   process.on('SIGINT', () => {
     bqStream.end();
