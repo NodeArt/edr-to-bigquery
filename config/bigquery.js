@@ -136,7 +136,7 @@ module.exports.fop = {
 module.exports.uo = {
   tableID: 'uo_s',
   record: ['executive_power', 'bankruptcy_readjustment_info', 'termination_started_info'],
-  repeated: ['activity_kinds', 'exchange_data', 'branches', 'predecessors', 'assignees', 'signers', 'founders'],
+  repeated: ['activity_kinds', 'exchange_data', 'branches', 'predecessors', 'assignees', 'signers', 'founders', 'beneficiaries', 'branches.activity_kinds', 'branches.exchange_data'],
   settlementsSchema: [
     {
       name: 'record',
@@ -206,6 +206,11 @@ module.exports.uo = {
     },
     {
       name: 'founders',
+      type: 'STRING',
+      mode: 'REPEATED',
+    },
+    {
+      name: 'beneficiaries',
       type: 'STRING',
       mode: 'REPEATED',
     },

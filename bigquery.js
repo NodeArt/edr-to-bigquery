@@ -1,7 +1,9 @@
 const { BigQuery } = require('@google-cloud/bigquery');
-const sax = require('sax');
 const iconv = require('iconv-lite');
 const { pipeline } = require('stream');
+const readline = require('readline');
+const xmlToJson = require('xml-to-json-stream');
+const parser = xmlToJson();
 
 const { bigqueryConfig } = require('./config/bigquery');
 
@@ -44,12 +46,6 @@ module.exports.getTable = async (tableConfig) => {
 
 module.exports.insertData = (fileStream, tableConfig) => {
   const entityTag = 'subject';
-  const skipTags = ['data', 'subject'];
-  const written = false;
-  const buffer = [];
-  let entity = [{}];
-  let paused = false;
-  let count = 0;
 
   const bqStream = db.dataset(bigqueryConfig.datasetID).table(tableConfig.tableID).createWriteStream({
     sourceFormat: 'NEWLINE_DELIMITED_JSON',
@@ -62,12 +58,9 @@ module.exports.insertData = (fileStream, tableConfig) => {
 
   const iconvStream = iconv.decodeStream('win1251');
 
-  const saxStream = sax.createStream(true);
-
-  pipeline(
+  const pl = pipeline(
     fileStream,
     iconvStream,
-    saxStream,
     (err) => {
       if (err) {
         console.error('Pipeline failed', err);
@@ -77,107 +70,58 @@ module.exports.insertData = (fileStream, tableConfig) => {
     },
   );
 
-  saxStream.on('error', function (e) {
-    console.error('error!', e);
-
-    this._parser.error = null;
-    this._parser.resume();
+  const rl = readline.createInterface({
+    input: pl
   });
 
-  saxStream.on('opentag', function (node) {
-    // if tag is <entity>, then create new entity and fill it with tag attriutes
-    if (node.name.toLowerCase() === entityTag) {
-      entity = [
-        Object.keys(node.attributes).reduce((a, v) => {
-          a[v.toLowerCase()] = node.attributes[v];
-          return a;
-        }, {}),
-      ];
-    }
+  const get = (obj, path) => path ? path.split('.').reduce((a, v) => Array.isArray(a) ? a.map(e => e[v]) : a[v], obj) : obj;
+  const set = (obj, path, val) => {
+    const arr = path.split('.');
+    const last = arr.pop();
 
-    // if tag is <data> or <entity>, then return to prevent entity from pushing additional object
-    if (skipTags.includes(node.name.toLowerCase())) return;
+    if (typeof val !== 'function') val = () => val;
 
-    // add new level of nesting
-    entity.push({});
-  });
+    const target = get(obj, arr.join('.'));
+    Array.isArray(target) ? target.map(e => e[last] = val(e[last])) : target[last] = val(target[last]);
+  }
 
-  saxStream.on('text', function (text) {
-    // if text exists, replace nested object with string
-    if (text.trim() !== '') entity[entity.length - 1] = text;
-  });
+  let count = 0;
 
-  saxStream.on('closetag', function (name) {
-    const lname = name.toLowerCase();
-
-    // if tag is </entity>, then entity is complete, so encode it into JSONL and write to BQ stream
-    if (name.toLowerCase() === entityTag) {
-      if (paused) {
-        buffer.push(JSON.stringify(entity[entity.length - 1]) + '\n');
-        return;
-      }
-
-      while (buffer.length > 0) {
-        bqStream.write(buffer.shift(), 'utf8');
-      }
-
-      if (!written) {
-        const writable = bqStream.write(JSON.stringify(entity[entity.length - 1]) + '\n', 'utf8');
+  rl.on('line', (line) => { 
+    parser.xmlToJson(line, (err, json) => {
+      try {
+        if (typeof json === 'undefined') return;
+        if (!Object.keys(json).includes(entityTag.toUpperCase())) return;
+  
+        const entity = json[entityTag.toUpperCase()];
+        for (let field of tableConfig.repeated) {
+          const value = get(entity, field.toUpperCase());
+          if (typeof value === 'object' && Object.keys(value).length === 1) {
+            set(entity, field.toUpperCase(), (v) => Object.entries(v)[0][1]);
+          }
+          if (!Array.isArray(entity[field.toUpperCase()])) {
+            set(entity, field.toUpperCase(), []);
+          }
+        }
+  
+        for (const field of tableConfig.record) {
+          if (typeof get(entity, field.toUpperCase()) !== 'object') {
+            set(entity, field.toUpperCase(), {});
+          }
+        }
+  
         count++;
-        if (count % 10000 === 0) {
+        if (count % 1000 === 0) {
           console.log(count);
         }
-
-        if (!writable) {
-          paused = true;
-          iconvStream.pause();
-          bqStream.once('drain', () => {
-            paused = false;
-            iconvStream.resume();
-          });
-        }
-      } else {
-        bqStream.once('complete', () => {
-          console.log('bq end');
-          process.exit(0);
-        });
-        bqStream.end();
+  
+        const writable = bqStream.write(JSON.stringify(entity) + '\n', 'utf8');
+      } catch (error) {
+        console.log(error);
+        process.exit(1);
       }
-    }
-
-    // skip </data> and </entity>
-    if (skipTags.includes(lname)) return;
-
-    // as tag closes, write all of it's data to previous level
-    let data = entity.pop();
-    // check if data contains only one element that is an array. If so, then rewrite data as array to flatten data
-    if (tableConfig.repeated.includes(lname) && Object.keys(data).length === 1) data = [].concat(Object.entries(data)[0][1]);
-    // if data is empty, then write null
-    if (typeof data === 'object' && Object.keys(data).length === 0) {
-      if (tableConfig.repeated.includes(lname)) {
-        data = [];
-      } else if (tableConfig.record.includes(lname)) {
-        data = {};
-      } else {
-        data = '';
-      }
-    }
-
-    // check if such tag already exists; if not, then just write data to it
-    if (entity[entity.length - 1][lname]) {
-      // if it's already an array, then push data to it; if not, then create the array with existing and new data
-      if (Array.isArray(entity[entity.length - 1][lname])) {
-        entity[entity.length - 1][lname].push(data);
-      } else {
-        entity[entity.length - 1][lname] = [entity[entity.length - 1][lname], data];
-      }
-    } else {
-      entity[entity.length - 1][lname] = data;
-    }
+    });
   });
-
-  // manually end the bqStream if no XML data is left to write all remaining entities
-  saxStream.on('end', () => (console.log('SAX stream end'), bqStream.end()));
 
   bqStream.once('complete', () => {
     console.log('bq end');
