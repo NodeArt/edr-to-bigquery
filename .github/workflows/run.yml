@@ -30,16 +30,16 @@ jobs:
       - name: 'Build container image'
         run: |
           docker buildx build \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache,mode=max \
+            --cache-from="type=local,src=/tmp/.buildx-cache" \
+            --cache-to="type=local,dest=/tmp/.buildx-cache,mode=max" \
             --platform "linux/amd64" \
             -o .reports \
-            --build-arg BQ_DATASET_ID=${{ secrets.BQ_DATASET_ID }} \
-            --build-arg BQ_PROJECT_ID=${{ secrets.BQ_PROJECT_ID }} \
-            --build-arg BQ_PRIVATE_KEY=${{ secrets.BQ_PRIVATE_KEY }} \
-            --build-arg BQ_CLIENT_ID=${{ secrets.BQ_CLIENT_ID }} \
-            --build-arg BQ_CLIENT_EMAIL=${{ secrets.BQ_CLIENT_EMAIL }} \
-            --build-arg RUN_ID=${{ github.run_id }} \
+            --build-arg "BQ_DATASET_ID=${{ secrets.BQ_DATASET_ID }}" \
+            --build-arg "BQ_PROJECT_ID=${{ secrets.BQ_PROJECT_ID }}" \
+            --build-arg "BQ_PRIVATE_KEY=${{ secrets.BQ_PRIVATE_KEY }}" \
+            --build-arg "BQ_CLIENT_ID=${{ secrets.BQ_CLIENT_ID }}" \
+            --build-arg "BQ_CLIENT_EMAIL=${{ secrets.BQ_CLIENT_EMAIL }}" \
+            --build-arg "RUN_ID=${{ github.run_id }}" \
             --target "jobs-done" \
             --file "./Dockerfile" \
             "./"
