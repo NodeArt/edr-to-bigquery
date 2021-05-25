@@ -5,12 +5,14 @@ name: Run script
 # Controls when the action will run. Workflow runs when manually triggered using the UI
 # or API.
 on:
-  schedule:
-    - cron:  '0 0 * * *'
+  # schedule:
+  #   - cron:  '0 0 * * *'
+  push:
+    branches: fix/actions
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     name: Build and Deploy
     steps:
       - name: 'Checkout the source code'
