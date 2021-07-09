@@ -45,7 +45,38 @@ module.exports.getTable = async (tableConfig) => {
 };
 
 module.exports.insertData = (fileStream, tableConfig) => {
-  const entityTag = 'subject';
+  const entityTag = 'SUBJECT';
+  const tagsArray = [
+    'RECORD',
+    'NAME',
+    'SHORT_NAME',
+    'OPF',
+    'EDRPOU',
+    'ADDRESS',
+    'STAN',
+    'FOUNDING_DOCUMENT_NUM',
+    'EXECUTIVE_POWER',
+    'FOUNDERS',
+    'BENEFICIARIES',
+    'ACTIVITY_KINDS',
+    'SUPERIOR_MANAGEMENT',
+    'SIGNERS',
+    'AUTHORIZED_CAPITAL',
+    'STATUTE',
+    'REGISTRATION',
+    'MANAGING_PAPER',
+    'BRANCHES',
+    'TERMINATION_STARTED_INFO',
+    'BANKRUPTCY_READJUSTMENT_INFO',
+    'PREDECESSORS',
+    'ASSIGNEES',
+    'TERMINATED_INFO',
+    'TERMINATION_CANCEL_INFO',
+    'CONTACTS',
+    'EXCHANGE_DATA',
+    'VP_DATES',
+    'CURRENT_AUTHORITY'
+  ]
 
   const bqStream = db.dataset(bigqueryConfig.datasetID).table(tableConfig.tableID).createWriteStream({
     sourceFormat: 'NEWLINE_DELIMITED_JSON',
@@ -71,7 +102,7 @@ module.exports.insertData = (fileStream, tableConfig) => {
   );
 
   const rl = readline.createInterface({
-    input: pl
+    input: pl,
   });
 
   const get = (obj, path) => path ? path.split('.').reduce((a, v) => Array.isArray(a) ? a.map(e => e[v]) : a[v], obj) : obj;
@@ -83,18 +114,25 @@ module.exports.insertData = (fileStream, tableConfig) => {
 
     const target = get(obj, arr.join('.'));
     Array.isArray(target) ? target.map(e => e[last] = val(e[last])) : target[last] = val(target[last]);
-  }
+  };
 
   let count = 0;
 
-  rl.on('line', (line) => { 
+  rl.on('line', (line) => {
     parser.xmlToJson(line, (err, json) => {
       try {
         if (typeof json === 'undefined') return;
-        if (!Object.keys(json).includes(entityTag.toUpperCase())) return;
-  
-        const entity = json[entityTag.toUpperCase()];
-        for (let field of tableConfig.repeated) {
+        if (!Object.keys(json).includes(entityTag)) return;
+        const lineTags = Object.getOwnPropertyNames(json?.SUBJECT);
+        const compare = lineTags.every((tag, index) => {
+          return tag == tagsArray[index]
+        });
+        if (!compare)return;
+        tagsArray.forEach((tag) => {
+          line[tag] = line?.[tag] ?? ''
+        })
+        const entity = json[entityTag];
+        for (const field of tableConfig.repeated) {
           const value = get(entity, field.toUpperCase());
           if (typeof value === 'object' && Object.keys(value).length === 1) {
             set(entity, field.toUpperCase(), (v) => Object.entries(v)[0][1]);
@@ -103,18 +141,18 @@ module.exports.insertData = (fileStream, tableConfig) => {
             set(entity, field.toUpperCase(), []);
           }
         }
-  
+
         for (const field of tableConfig.record) {
           if (typeof get(entity, field.toUpperCase()) !== 'object') {
             set(entity, field.toUpperCase(), {});
           }
         }
-  
+
         count++;
         if (count % 1000 === 0) {
           console.log(count);
         }
-  
+
         const writable = bqStream.write(JSON.stringify(entity) + '\n', 'utf8');
       } catch (error) {
         console.log(error);
