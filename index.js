@@ -3,6 +3,7 @@ require('dotenv').config();
 const fetch = require('node-fetch');
 const unzipper = require('unzipper');
 const path = require('path');
+const request = require('request');
 
 const { DATA_URL } = require('./config/download');
 const { getTable, insertData } = require('./bigquery');
@@ -13,8 +14,9 @@ const downloadFile = async () => {
   const json = await res.json();
   const url = json.result.resources.map(r => r.url).find(url => url.includes('full'));
 
-  const fileReq = await fetch(url);
-  fileReq.body.pipe(unzipper.Parse())
+  // const fileReq = await fetch(url);
+  // fileReq.body.pipe(unzipper.Parse())
+  request(url).pipe(unzipper.Parse())
     .on('entry', function (entry) {
       const tables = ['uo', 'fop'];
 

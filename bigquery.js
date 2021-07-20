@@ -46,37 +46,37 @@ module.exports.getTable = async (tableConfig) => {
 
 module.exports.insertData = (fileStream, tableConfig) => {
   const entityTag = 'SUBJECT';
-  const tagsArray = [
-    'RECORD',
-    'NAME',
-    'SHORT_NAME',
-    'OPF',
-    'EDRPOU',
-    'ADDRESS',
-    'STAN',
-    'FOUNDING_DOCUMENT_NUM',
-    'EXECUTIVE_POWER',
-    'FOUNDERS',
-    'BENEFICIARIES',
-    'ACTIVITY_KINDS',
-    'SUPERIOR_MANAGEMENT',
-    'SIGNERS',
-    'AUTHORIZED_CAPITAL',
-    'STATUTE',
-    'REGISTRATION',
-    'MANAGING_PAPER',
-    'BRANCHES',
-    'TERMINATION_STARTED_INFO',
-    'BANKRUPTCY_READJUSTMENT_INFO',
-    'PREDECESSORS',
-    'ASSIGNEES',
-    'TERMINATED_INFO',
-    'TERMINATION_CANCEL_INFO',
-    'CONTACTS',
-    'EXCHANGE_DATA',
-    'VP_DATES',
-    'CURRENT_AUTHORITY'
-  ]
+  // const tagsArray = [
+  //   'RECORD',
+  //   'NAME',
+  //   'SHORT_NAME',
+  //   'OPF',
+  //   'EDRPOU',
+  //   'ADDRESS',
+  //   'STAN',
+  //   'FOUNDING_DOCUMENT_NUM',
+  //   'EXECUTIVE_POWER',
+  //   'FOUNDERS',
+  //   'BENEFICIARIES',
+  //   'ACTIVITY_KINDS',
+  //   'SUPERIOR_MANAGEMENT',
+  //   'SIGNERS',
+  //   'AUTHORIZED_CAPITAL',
+  //   'STATUTE',
+  //   'REGISTRATION',
+  //   'MANAGING_PAPER',
+  //   'BRANCHES',
+  //   'TERMINATION_STARTED_INFO',
+  //   'BANKRUPTCY_READJUSTMENT_INFO',
+  //   'PREDECESSORS',
+  //   'ASSIGNEES',
+  //   'TERMINATED_INFO',
+  //   'TERMINATION_CANCEL_INFO',
+  //   'CONTACTS',
+  //   'EXCHANGE_DATA',
+  //   'VP_DATES',
+  //   'CURRENT_AUTHORITY'
+  // ]
 
   const bqStream = db.dataset(bigqueryConfig.datasetID).table(tableConfig.tableID).createWriteStream({
     sourceFormat: 'NEWLINE_DELIMITED_JSON',
@@ -123,14 +123,14 @@ module.exports.insertData = (fileStream, tableConfig) => {
       try {
         if (typeof json === 'undefined') return;
         if (!Object.keys(json).includes(entityTag)) return;
-        const lineTags = Object.getOwnPropertyNames(json?.SUBJECT);
-        const compare = lineTags.every((tag, index) => {
-          return tag == tagsArray[index]
-        });
-        if (!compare)return;
-        tagsArray.forEach((tag) => {
-          line[tag] = line?.[tag] ?? ''
-        })
+        // const lineTags = Object.getOwnPropertyNames(json?.SUBJECT);
+        // const compare = lineTags.every((tag, index) => {
+        //   return tag == tagsArray[index]
+        // });
+        // if (!compare)return;
+        // tagsArray.forEach((tag) => {
+        //   line[tag] = line?.[tag] ?? ''
+        // })
         const entity = json[entityTag];
         for (const field of tableConfig.repeated) {
           const value = get(entity, field.toUpperCase());
