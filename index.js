@@ -3,7 +3,7 @@ require('dotenv').config();
 const fetch = require('node-fetch');
 const unzipper = require('unzipper');
 const path = require('path');
-const request = require('request');
+const axios = require('axios');
 
 const { DATA_URL } = require('./config/download');
 const { getTable, insertData } = require('./bigquery');
@@ -16,7 +16,8 @@ const downloadFile = async () => {
 
   // const fileReq = await fetch(url);
   // fileReq.body.pipe(unzipper.Parse())
-  request(url).pipe(unzipper.Parse())
+  const fileReq = await axios({url, method: 'GET', responseType: 'stream'})
+  fileReq.data.pipe(unzipper.Parse())
     .on('entry', function (entry) {
       const tables = ['uo', 'fop'];
 
