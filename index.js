@@ -1,9 +1,10 @@
 require('dotenv').config();
 
 const fetch = require('node-fetch');
-const unzipper = require('unzipper');
+const unzipper = require('unzip-stream');
 const path = require('path');
-const fs = require('fs');
+const axios = require('axios');
+// const request = require('request');
 
 const { DATA_URL } = require('./config/download');
 const { getTable, insertData } = require('./bigquery');
@@ -14,10 +15,11 @@ const downloadFile = async () => {
   const json = await res.json();
   const url = json.result.resources.map(r => r.url).find(url => url.includes('full'));
 
-  const fileReq = await fetch(url);
-  const file = fileReq.body.pipe(fs.createWriteStream('./tmp.zip'))
-  file.on('finish', () => {
-    fs.createReadStream('./tmp.zip').pipe(unzipper.Parse())
+  // const fileReq = await fetch(url);
+  // fileReq.body.pipe(unzipper.Parse())
+  // request(url).pipe(unzipper.Parse())
+  const fileReq = await axios({url, method: 'GET', responseType: 'stream'})
+  fileReq.data.pipe(unzipper.Parse())
     .on('entry', function (entry) {
       const tables = ['uo', 'fop'];
 
@@ -37,11 +39,7 @@ const downloadFile = async () => {
         console.log('ERROR: Table for file', entry.path, 'is not found');
         entry.autodrain();
       }
-    }).on('error', (e) => {
-      console.log('ERROR:', e);
-      process.exit(1);
     });
-  });
 };
 
 downloadFile();

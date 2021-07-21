@@ -168,10 +168,10 @@ module.exports.insertData = (fileStream, tableConfig) => {
 
   bqStream.on('error', (e) => console.log(e));
 
-  // fileStream.on('error', () => (console.log('File stream error'), bqStream.end()));
-  // fileStream.on('end', () => (console.log('File stream end'), bqStream.end()));
-  // iconvStream.on('error', () => (console.log('Iconv stream error'), bqStream.end()));
-  // iconvStream.on('end', () => (console.log('Iconv stream end'), bqStream.end()));
+  fileStream.on('error', () => (console.log('File stream error'), bqStream.end()));
+  fileStream.on('end', () => (console.log('File stream end'), bqStream.end()));
+  iconvStream.on('error', () => (console.log('Iconv stream error'), bqStream.end()));
+  iconvStream.on('end', () => (console.log('Iconv stream end'), bqStream.end()));
 
   process.on('SIGINT', () => {
     bqStream.end();
