@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 const fetch = require('node-fetch');
-const unzipper = require('unzipper');
+const unzipper = require('unzip-stream');
 const path = require('path');
 const rrs = require('request-retry-stream');
 
