@@ -14,7 +14,7 @@ const downloadFile = async () => {
   const json = await res.json();
   const url = json.result.resources.map(r => r.url).find(url => url.includes('full'));
 
-  rrs.get(url, {timeout: 10000, throttle: 2000, delay: 1000}).pipe(unzipper.Parse())
+  rrs.get(url).pipe(unzipper.Parse())
     .on('entry', function (entry) {
       const tables = ['uo', 'fop'];
 
