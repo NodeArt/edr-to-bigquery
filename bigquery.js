@@ -148,6 +148,18 @@ module.exports.insertData = (fileStream, tableConfig) => {
           }
         }
 
+        const getStrings = (prefix, elems) => (
+          elems.flatMap(e => e.fields ? getStrings(prefix + e.name.toUpperCase() + '.', e.fields) : prefix + e.name.toUpperCase())
+        );
+
+        const names = getStrings('', tableConfig.settlementsSchema);
+        
+        for (const name of names) {
+          if (!tableConfig.repeated.includes(name.toLowerCase()) && Array.isArray(get(entity, name))) {
+            set(entity, name, e => Array.isArray(e) ? e[0] : e);
+          }
+        }
+
         count++;
         if (count % 1000 === 0) {
           console.log(count);

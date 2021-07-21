@@ -13,14 +13,10 @@
   "license": "ISC",
   "dependencies": {
     "@google-cloud/bigquery": "^5.6.0",
-    "axios": "^0.21.1",
     "dotenv": "^10.0.0",
     "iconv-lite": "^0.6.3",
     "node-fetch": "^2.6.0",
-    "request": "^2.88.2",
-    "request-debug": "^0.2.0",
     "request-retry-stream": "^2.1.1",
-    "unzip-stream": "^0.3.1",
     "unzipper": "^0.10.11",
     "xml-to-json-stream": "^1.1.0"
   },
