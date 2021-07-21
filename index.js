@@ -5,6 +5,8 @@ const unzipper = require('unzipper');
 const path = require('path');
 const axios = require('axios');
 const request = require('request');
+const rrs = require('request-retry-stream');
+// require('request-debug')(request);
 
 const { DATA_URL } = require('./config/download');
 const { getTable, insertData } = require('./bigquery');
@@ -17,7 +19,7 @@ const downloadFile = async () => {
 
   // const fileReq = await fetch(url);
   // fileReq.body.pipe(unzipper.Parse())
-  request({url, timeout: 10000}).pipe(unzipper.Parse())
+  rrs.get(url, {timeout: 10000, throttle: 2000, delay: 1000}).pipe(unzipper.Parse())
   // const fileReq = await axios({url, method: 'GET', responseType: 'stream'})
   // fileReq.data.pipe(unzipper.Parse())
     .on('entry', function (entry) {
