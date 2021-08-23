@@ -19,7 +19,6 @@
     "nodejs-file-downloader": "^4.7.2",
     "request-retry-stream": "^2.1.1",
     "unzip-stream": "^0.3.1",
-    "unzipper": "^0.10.11",
     "xml-to-json-stream": "^1.1.0"
   },
   "devDependencies": {
