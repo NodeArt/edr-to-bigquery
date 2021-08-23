@@ -175,7 +175,6 @@ module.exports.insertData = (fileStream, tableConfig) => {
 
   bqStream.once('complete', () => {
     console.log('bq end');
-    process.exit(0);
   });
 
   bqStream.on('error', (e) => console.log(e));
