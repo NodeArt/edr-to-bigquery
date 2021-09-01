@@ -24,6 +24,10 @@ const downloadFile = async () => {
         console.log(percentage, '%');
       }
     },
+    maxAttempts: 3,
+    onError: (error) => {
+      console.log('Error from attempt ', error);
+    },
   });
   try {
     await downloader.download();
