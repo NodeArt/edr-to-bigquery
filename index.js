@@ -15,22 +15,33 @@ const downloadFile = async () => {
   const url = json.result.resources.map(r => r.url).find(url => url.includes('full'));
 
   let prevPercent = 0;
-  const downloader = new Downloader({
-    url,
-    directory: './downloads',
-    onProgress: (percentage) => {
-      if (Math.floor(percentage) !== prevPercent) {
-        prevPercent = Math.floor(percentage);
-        console.log(percentage, '%');
-      }
-    },
-    maxAttempts: 3,
-    onError: (error) => {
-      console.log('Error from attempt ', error);
-    },
-  });
-  try {
-    await downloader.download();
+  let retries = 3;
+
+  while (prevPercent < 100 && retries > 0) {
+    retries--;
+    const downloader = new Downloader({
+      url,
+      directory: './downloads',
+      onProgress: (percentage) => {
+        if (Math.floor(percentage) !== prevPercent) {
+          prevPercent = Math.floor(percentage);
+          console.log(percentage, '%');
+        }
+      },
+      maxAttempts: 3,
+      onError: (error) => {
+        console.log('Error from attempt ', error);
+      },
+    });
+
+    try {
+      const a = await downloader.download();
+    } catch (error) {
+      console.log('Download failed', error);
+    }
+  }
+
+  if (prevPercent >= 100) {
     console.log('Download finished!');
 
     const filename = url.split('/').pop();
@@ -55,8 +66,8 @@ const downloadFile = async () => {
           entry.autodrain();
         }
       });
-  } catch (error) {
-    console.log('Download failed', error);
+  } else {
+    throw new Error('Failed to download a file');
   }
 };
 
