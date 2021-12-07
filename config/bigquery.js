@@ -32,6 +32,11 @@ module.exports.fop = {
       mode: 'NULLABLE',
     },
     {
+      name: 'farmer',
+      type: 'STRING',
+      mode: 'NULLABLE',
+    },
+    {
       name: 'activity_kinds',
       type: 'STRUCT',
       mode: 'REPEATED',
