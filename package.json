@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@google-cloud/bigquery": "^5.9.2",
+    "@google-cloud/bigquery": "^5.10.0",
     "dotenv": "^10.0.0",
     "iconv-lite": "^0.6.3",
     "node-fetch": "^2.6.0",
@@ -22,9 +22,9 @@
   },
   "devDependencies": {
     "commitlint": "^15.0.0",
-    "eslint": "^8.3.0",
+    "eslint": "^8.6.0",
     "eslint-config-standard": "^16.0.3",
-    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-import": "^2.25.4",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.2.0",
     "eslint-plugin-standard": "^5.0.0",
