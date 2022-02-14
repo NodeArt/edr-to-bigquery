@@ -21,7 +21,7 @@
     "xml-to-json-stream": "^1.1.0"
   },
   "devDependencies": {
-    "commitlint": "^15.0.0",
+    "commitlint": "^16.2.1",
     "eslint": "^8.7.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.4",
