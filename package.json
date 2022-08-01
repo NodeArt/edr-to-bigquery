@@ -15,7 +15,7 @@
     "@google-cloud/bigquery": "^5.10.0",
     "dotenv": "^14.2.0",
     "iconv-lite": "^0.6.3",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^3.2.10",
     "nodejs-file-downloader": "^4.9.2",
     "unzip-stream": "^0.3.1",
     "xml-to-json-stream": "^1.1.0"
